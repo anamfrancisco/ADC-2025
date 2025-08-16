@@ -1,0 +1,26 @@
+<h1>Register</h1>
+<form action="/register" method="POST">
+  <!-- REQUIRED FIELDS -->
+  <input type="text" name="username" placeholder="Username (e.g. petermurphy3456)" required />
+  <input type="text" name="name" placeholder="Full Name" required />
+  <input type="email" name="email" placeholder="Email" required />
+  <input type="tel" name="telephone" placeholder="Phone (e.g. +351123456789)" required />
+  <input type="password" name="password" placeholder="Password" required />
+  <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
+
+  <!-- OPTIONAL FIELDS -->
+  <select name="profile">
+    <option value="">-- Select Profile --</option>
+    <option value="Público">Público</option>
+    <option value="Privado">Privado</option>
+  </select>
+
+  <input type="text" name="occupation" placeholder="Occupation (e.g. Estudante)" />
+  <input type="text" name="workplace" placeholder="Workplace (e.g. FCT, Empresa)" />
+  <input type="text" name="address" placeholder="Address" />
+  <input type="text" name="postal_code" placeholder="Código Postal (e.g. 1234-567)" />
+  <input type="text" name="nif" placeholder="NIF (e.g. 123456789)" />
+  <input type="text" name="photo" placeholder="Photo URL or file name" />
+
+  <button type="submit">Register</button>
+</form>

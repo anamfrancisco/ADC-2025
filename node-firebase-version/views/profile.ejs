@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Perfil</title>
+  <style>
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    .readonly { background-color: #f0f0f0; border: 1px solid #ccc; padding: 5px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #eee; }
+    form { margin: 0; }
+    nav { position: fixed; top: 10px; right: 10px; }
+  </style>
+</head>
+<body>
+
+  <form action="/logout" method="POST" style="display:inline;">
+  <button type="submit">Logout</button></form>
+    <h2>Perfil de <%= currentUser.username %></h2>
+
+<form method="GET" action="/profile">
+  <label for="editUserId">Selecionar utilizador:</label>
+  <select name="editUserId" id="editUserId" onchange="this.form.submit()">
+    <% users.forEach(u => { %>
+      <option value="<%= u.uid %>" <%= u.uid === selectedUser.uid ? 'selected' : '' %>>
+        <%= u.username %> (<%= u.role %>)
+      </option>
+    <% }) %>
+  </select>
+</form>
+
+<hr>
+
+<div style="margin-top: 30px; padding: 20px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9;">
+  <h3>Edição de atributos de <%= selectedUser.username %></h3>
+  <%
+  const isSelf = currentUser.uid === selectedUser.uid;
+  const isAdmin = currentUser.role === 'ADMIN';
+  const isBackoffice = currentUser.role === 'BACKOFFICE';
+  const isEnduser = currentUser.role === 'ENDUSER';
+
+  function canEditField(field) {
+    if (isAdmin) return true;
+
+    const protectedFieldsSelf = ['username', 'email', 'name', 'role', 'status'];
+    const protectedFieldsBackofficeOther = ['username', 'email'];
+
+    if (isSelf && (isEnduser || isBackoffice)) {
+      return !protectedFieldsSelf.includes(field);
+    }
+
+    if (isBackoffice && !isSelf && ['ENDUSER', 'PARTNER'].includes(selectedUser.role) && selectedUser.status === 'ATIVADA') {
+      return !protectedFieldsBackofficeOther.includes(field);
+    }
+
+    return false;
+  }
+
+  function fieldValue(field, value) {
+    return value !== 'NOT DEFINED' ? value : '';
+  }
+
+  function readonlyAttr(field) {
+    return canEditField(field) ? '' : 'readonly class="readonly"';
+  }
+
+  function disabledAttr(field) {
+    return canEditField(field) ? '' : 'disabled class="readonly"';
+  }
+%>
+
+<form id="editForm" method="POST" action="/edit-user/<%= selectedUser.uid %>">
+
+  <label>Username: </label>
+  <input type="text" name="username" value="<%= selectedUser.username %>" <%= readonlyAttr('username') %>><br>
+
+  <label>Email: </label>
+  <input type="text" name="email" value="<%= selectedUser.email %>" <%= readonlyAttr('email') %>><br>
+
+  <label>Nome: </label>
+  <input type="text" name="name" value="<%= selectedUser.name %>" <%= readonlyAttr('name') %>><br>
+
+  <label>Telefone: </label>
+  <input type="text" name="telephone" value="<%= fieldValue('telephone', selectedUser.telephone) %>" <%= readonlyAttr('telephone') %>><br>
+
+  <label>Morada: </label>
+  <input type="text" name="address" value="<%= fieldValue('address', selectedUser.address) %>" <%= readonlyAttr('address') %>><br>
+
+  <label>Código Postal: </label>
+  <input type="text" name="postal_code" value="<%= fieldValue('postal_code', selectedUser.postal_code) %>" <%= readonlyAttr('postal_code') %>><br>
+
+  <label>Ocupação: </label>
+  <input type="text" name="occupation" value="<%= fieldValue('occupation', selectedUser.occupation) %>" <%= readonlyAttr('occupation') %>><br>
+
+  <label>Local de Trabalho: </label>
+  <input type="text" name="workplace" value="<%= fieldValue('workplace', selectedUser.workplace) %>" <%= readonlyAttr('workplace') %>><br>
+
+  <label>NIF: </label>
+  <input type="text" name="nif" value="<%= fieldValue('nif', selectedUser.nif) %>" <%= readonlyAttr('nif') %>><br>
+
+  <label>Perfil (Público/Privado): </label>
+  <select name="profile" <%= disabledAttr('profile') %>>
+    <option value="">-- Selecionar --</option>
+    <option value="Público" <%= selectedUser.profile === 'Público' ? 'selected' : '' %>>Público</option>
+    <option value="Privado" <%= selectedUser.profile === 'Privado' ? 'selected' : '' %>>Privado</option>
+  </select><br>
+
+  <button type="submit">Guardar alterações</button>
+</form>
+
+</div>
+
+<script>
+  // Evitar submissão com todos os campos vazios
+  document.getElementById('editForm').addEventListener('submit', function(e) {
+    const inputs = this.querySelectorAll('input, select');
+    let hasData = false;
+
+    inputs.forEach(input => {
+      if (input.value.trim() !== '') hasData = true;
+    });
+
+    if (!hasData) {
+      e.preventDefault();
+      alert("Preencha pelo menos um campo antes de guardar.");
+    }
+  });
+</script>
+
+
+  <h2>Gestão de Utilizadores</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role Atual</th>
+        <th>Alterar Role</th>
+        <th>Estado</th>
+        <th>Remover</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(u => { %>
+        <tr>
+          <td><%= u.username %></td>
+          <td><%= u.email %></td>
+          <td><%= u.role %></td>
+
+          <!-- Alterar Role -->
+          <td>
+            <% if (
+              currentUser.role === 'ADMIN' ||
+              (currentUser.role === 'BACKOFFICE' && (u.role === 'ENDUSER' || u.role === 'PARTNER'))
+            ) { %>
+              <form action="/change-role/<%= u.uid %>" method="POST">
+                <select name="newRole" required>
+                  <% if (currentUser.role === 'ADMIN') { %>
+                    <option value="ENDUSER" <%= u.role === 'ENDUSER' ? 'selected' : '' %>>ENDUSER</option>
+                    <option value="BACKOFFICE" <%= u.role === 'BACKOFFICE' ? 'selected' : '' %>>BACKOFFICE</option>
+                    <option value="PARTNER" <%= u.role === 'PARTNER' ? 'selected' : '' %>>PARTNER</option>
+                    <option value="ADMIN" <%= u.role === 'ADMIN' ? 'selected' : '' %>>ADMIN</option>
+                  <% } else if (currentUser.role === 'BACKOFFICE') { %>
+                    <% if (u.role === 'ENDUSER') { %>
+                        <option value="ENDUSER" selected>ENDUSER</option>
+                        <option value="PARTNER">PARTNER</option>
+                    <% } else if (u.role === 'PARTNER') { %>
+                        <option value="PARTNER" selected>PARTNER</option>
+                        <option value="ENDUSER">ENDUSER</option>
+                    <% } %>
+                    <% } %>
+                </select>
+                <button type="submit">Atualizar</button>
+              </form>
+            <% } else { %>
+              <em>-</em>
+            <% } %>
+          </td>
+
+          <!-- Alterar Estado -->
+          <td>
+            <% if (
+            currentUser.role === 'ADMIN' ||
+            currentUser.role === 'BACKOFFICE'
+            ) { %>
+            <form action="/change-status/<%= u.uid %>" method="POST">
+                <button type="submit">
+                <%= u.status === 'ATIVADA' ? 'Desativar' : 'Ativar' %>
+                </button>
+            </form>
+            <% } else { %>
+            <%= u.status %>
+            <% } %>
+          </td>
+          <td>
+            <% if (
+                currentUser.role === 'ADMIN' ||
+                (currentUser.role === 'BACKOFFICE' && (u.role === 'ENDUSER' || u.role === 'PARTNER'))
+            ) { %>
+                <form action="/delete-user/<%= u.uid %>" method="POST" onSubmit="return confirm('Tem a certeza que quer remover esta conta?');">
+                <button type="submit" style="background-color: red; color: white;">Remover</button>
+                </form>
+            <% } else { %>
+                <em>-</em>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+
+  <hr>
+  
+
+  <h2>Mudar Password</h2>
+    <form action="/change-password" method="POST">
+    <label>Password atual:</label>
+    <input type="password" name="currentPassword" required>
+
+    <label>Nova password:</label>
+    <input type="password" name="newPassword" required>
+
+    <label>Confirmar nova password:</label>
+    <input type="password" name="confirmPassword" required>
+
+    <button type="submit">Alterar Password</button>
+    </form>
+
+
+  <h2>Token de Sessão</h2>
+  <% if (currentUser.token) { %>
+    <div class="readonly">
+      <p><strong>USER:</strong> <%= currentUser.token.USER %></p>
+      <p><strong>ROLE:</strong> <%= currentUser.token.ROLE %></p>
+      <p><strong>VALID_FROM:</strong> <%= currentUser.token.VALIDITY.VALID_FROM %></p>
+      <p><strong>VALID_TO:</strong> <%= currentUser.token.VALIDITY.VALID_TO %></p>
+    </div>
+
+    <button onclick="copyToken()">Copiar Token</button>
+    <script>
+      function copyToken() {
+        const tokenData = `
+USER: <%= currentUser.token.USER %>
+ROLE: <%= currentUser.token.ROLE %>
+VALID_FROM: <%= currentUser.token.VALIDITY.VALID_FROM %>
+VALID_TO: <%= currentUser.token.VALIDITY.VALID_TO %>
+VERIFICADOR: <%= currentUser.token.VALIDITY.VERIF %>
+        `.trim();
+        navigator.clipboard.writeText(tokenData).then(() => {
+          alert("Token copiado para a área de transferência!");
+        });
+      }
+    </script>
+  <% } else { %>
+    <p style="color:red;">Token não disponível.</p>
+  <% } %>
+
+</body>
+</html>
