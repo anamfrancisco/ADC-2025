@@ -15,6 +15,13 @@ admin.initializeApp({
 const db = admin.firestore();
 const app = express();
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
+
+app.get('/', (req, res) => res.render('welcome'));
+app.get('/login', (req, res) => res.render('login'));
+app.get('/register', (req, res) => res.render('register'));
 const session = require('express-session');
 
 app.use(session({
@@ -22,16 +29,6 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use(express.json());
-
-app.get('/', (req, res) => res.render('welcome'));
-app.get('/login', (req, res) => res.render('login'));
-app.get('/register', (req, res) => res.render('register'));
-
 
 async function createRootUser() {
   const email = 'root@system.local';
@@ -161,7 +158,7 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  const API_KEY = process.env.FIREBASE_API_KEY; // Web API Key do Firebase
+  const API_KEY = 'AIzaSyBkR201Gn2JrbxUI2U-xRMCexA310repIw'; // Web API Key do Firebase
 
   try {
     // 1. Verifica as credenciais com Firebase Auth REST API
@@ -597,6 +594,10 @@ app.post('/edit-user/:uid', async (req, res) => {
     res.status(500).send("Erro ao atualizar atributos: " + err.message);
   }
 });
+
+
+
+
 
 
 createRootUser();
