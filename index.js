@@ -3,7 +3,6 @@ const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
 const path = require('path');
 const axios = require('axios');
-const serviceAccount = require('./firebase-config.json');
 const crypto = require('crypto');
 
 
@@ -169,7 +168,7 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  const API_KEY = 'AIzaSyBkR201Gn2JrbxUI2U-xRMCexA310repIw'; // Web API Key do Firebase
+  const API_KEY = process.env.API_KEY; // Web API Key do Firebase
 
   try {
     // 1. Verifica as credenciais com Firebase Auth REST API
@@ -499,7 +498,7 @@ app.post('/delete-user/:uid', async (req, res) => {
 app.post('/change-password', async (req, res) => {
   const currentUser = req.session.user;
   const { currentPassword, newPassword, confirmPassword } = req.body;
-  const API_KEY = 'AIzaSyBkR201Gn2JrbxUI2U-xRMCexA310repIw';
+  const API_KEY = process.env.API_KEY;
 
   if (!currentUser) {
     return res.status(401).send("Não autenticado.");
