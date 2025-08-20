@@ -2,11 +2,31 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Logout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>Logout efetuado com sucesso!</h1>
-  <p>A tua sessão foi terminada e o token invalidado.</p>
-  <a href="/login">Fazer novo login</a>
+<body class="bg-gray-50 flex items-center justify-center h-screen">
+  <div class="bg-white p-10 rounded-2xl shadow-lg text-center max-w-md w-full">
+    <!-- Success Icon -->
+    <div class="flex justify-center mb-6">
+      <svg xmlns="http://www.w3.org/2000/svg" 
+           class="h-16 w-16 text-green-500" 
+           fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0a9 9 0 0118 0z"/>
+      </svg>
+    </div>
+
+    <!-- Title -->
+    <h1 class="text-2xl font-bold text-indigo-600 mb-4">Logout efetuado com sucesso!</h1>
+    <p class="text-gray-600 mb-8">A tua sessão foi terminada e o token invalidado.</p>
+
+    <!-- Button -->
+    <a href="/login" 
+       class="px-6 py-3 bg-indigo-600 text-white rounded-xl shadow hover:bg-indigo-700 transition">
+      Fazer novo login
+    </a>
+  </div>
 </body>
 </html>

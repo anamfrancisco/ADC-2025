@@ -1,6 +1,46 @@
-<h1>Login</h1>
-<form action="/login" method="POST">
-  <input type="email" name="email" placeholder="Email" required />
-  <input type="password" name="password" placeholder="Password" required />
-  <button type="submit">Login</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center h-screen">
+  <div class="bg-white p-10 rounded-2xl shadow-lg w-full max-w-md">
+    <!-- Title -->
+    <h1 class="text-3xl font-bold text-indigo-600 mb-6 text-center">Login</h1>
+
+    <!-- Form -->
+    <form action="/login" method="POST" class="space-y-5">
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" name="email" id="email" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none" 
+          placeholder="Enter your email" />
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <input type="password" name="password" id="password" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none" 
+          placeholder="Enter your password" />
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit"
+        class="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl shadow hover:bg-indigo-700 transition">
+        Login
+      </button>
+    </form>
+
+    <!-- Extra Links -->
+    <p class="text-center text-sm text-gray-600 mt-6">
+      Don’t have an account?
+      <a href="/register" class="text-indigo-600 hover:underline">Register here</a>
+    </p>
+  </div>
+</body>
+</html>

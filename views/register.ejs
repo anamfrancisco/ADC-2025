@@ -1,26 +1,121 @@
-<h1>Register</h1>
-<form action="/register" method="POST">
-  <!-- REQUIRED FIELDS -->
-  <input type="text" name="username" placeholder="Username (e.g. petermurphy3456)" required />
-  <input type="text" name="name" placeholder="Full Name" required />
-  <input type="email" name="email" placeholder="Email" required />
-  <input type="tel" name="telephone" placeholder="Phone (e.g. +351123456789)" required />
-  <input type="password" name="password" placeholder="Password" required />
-  <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center py-10">
+  <div class="bg-white p-8 md:p-10 rounded-2xl shadow-lg w-full max-w-2xl">
+    <!-- Title -->
+    <h1 class="text-3xl font-bold text-indigo-600 mb-6 text-center">Create an Account</h1>
 
-  <!-- OPTIONAL FIELDS -->
-  <select name="profile">
-    <option value="">-- Select Profile --</option>
-    <option value="Público">Público</option>
-    <option value="Privado">Privado</option>
-  </select>
+    <!-- Form -->
+    <form action="/register" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- REQUIRED FIELDS -->
+      <div class="md:col-span-2">
+        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+        <input type="text" name="username" id="username" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="petermurphy3456" />
+      </div>
 
-  <input type="text" name="occupation" placeholder="Occupation (e.g. Estudante)" />
-  <input type="text" name="workplace" placeholder="Workplace (e.g. FCT, Empresa)" />
-  <input type="text" name="address" placeholder="Address" />
-  <input type="text" name="postal_code" placeholder="Código Postal (e.g. 1234-567)" />
-  <input type="text" name="nif" placeholder="NIF (e.g. 123456789)" />
-  <input type="text" name="photo" placeholder="Photo URL or file name" />
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+        <input type="text" name="name" id="name" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="John Doe" />
+      </div>
 
-  <button type="submit">Register</button>
-</form>
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" name="email" id="email" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="you@example.com" />
+      </div>
+
+      <div>
+        <label for="telephone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+        <input type="tel" name="telephone" id="telephone" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="+351123456789" />
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <input type="password" name="password" id="password" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="Enter password" />
+      </div>
+
+      <div>
+        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+        <input type="password" name="confirmPassword" id="confirmPassword" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="Confirm password" />
+      </div>
+
+      <!-- OPTIONAL FIELDS -->
+      <div>
+        <label for="profile" class="block text-sm font-medium text-gray-700 mb-1">Profile</label>
+        <select name="profile" id="profile"
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <option value="">-- Select Profile --</option>
+          <option value="Público">Público</option>
+          <option value="Privado">Privado</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="occupation" class="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
+        <input type="text" name="occupation" id="occupation"
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="Estudante" />
+      </div>
+
+      <div>
+        <label for="workplace" class="block text-sm font-medium text-gray-700 mb-1">Workplace</label>
+        <input type="text" name="workplace" id="workplace"
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="FCT, Empresa" />
+      </div>
+
+      <div class="md:col-span-2">
+        <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+        <input type="text" name="address" id="address"
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="Street, City" />
+      </div>
+
+      <div>
+        <label for="postal_code" class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+        <input type="text" name="postal_code" id="postal_code"
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="1234-567" />
+      </div>
+
+      <div>
+        <label for="nif" class="block text-sm font-medium text-gray-700 mb-1">NIF</label>
+        <input type="text" name="nif" id="nif"
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          placeholder="123456789" />
+      </div>
+
+      <!-- Submit Button -->
+      <div class="md:col-span-2">
+        <button type="submit"
+          class="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl shadow hover:bg-indigo-700 transition">
+          Register
+        </button>
+      </div>
+    </form>
+
+    <!-- Extra Links -->
+    <p class="text-center text-sm text-gray-600 mt-6">
+      Already have an account?
+      <a href="/login" class="text-indigo-600 hover:underline">Login here</a>
+    </p>
+  </div>
+</body>
+</html>
