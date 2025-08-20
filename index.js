@@ -397,17 +397,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/logout-success', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="pt">
-    <head><meta charset="UTF-8"><title>Logout</title></head>
-    <body>
-      <h1>Logout efetuado com sucesso!</h1>
-      <p>A tua sessão foi terminada e o token invalidado.</p>
-      <a href="/login">Fazer novo login</a>
-    </body>
-    </html>
-  `);
+    res.render('logout-success');
 });
 
 
