@@ -1,5 +1,3 @@
-import multer from "multer";
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
