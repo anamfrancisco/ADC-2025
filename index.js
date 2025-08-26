@@ -1,3 +1,5 @@
+import multer from "multer";
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
@@ -592,6 +594,82 @@ app.post('/edit-user/:uid', async (req, res) => {
   } catch (err) {
     console.error("Erro ao editar utilizador:", err);
     res.status(500).send("Erro ao atualizar atributos: " + err.message);
+  }
+});
+
+
+/* WORKSHEETS */
+
+// Listar worksheets
+app.get("/worksheets", async (req, res) => {
+  const snapshot = await db.collection("worksheets").get();
+  const worksheets = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+  res.render("worksheets", { worksheets });
+});
+
+
+// Configuração do multer para ficheiros em memória
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+// --- Listagem de worksheets ---
+app.get("/worksheets", async (req, res) => {
+  const snapshot = await db.collection("worksheets").orderBy("createdAt", "desc").get();
+  const worksheets = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  res.render("worksheets", { worksheets, currentUser: req.user });
+});
+
+// --- Formulário de importação ---
+app.get("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), (req, res) => {
+  res.render("worksheets-import", { currentUser: req.user, error: null });
+});
+
+// --- Importação de worksheet (GeoJSON) ---
+app.post("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), upload.single("geojson"), async (req, res) => {
+  try {
+    if (!req.file) throw new Error("Ficheiro GeoJSON não enviado.");
+
+    const geojson = JSON.parse(req.file.buffer.toString("utf8"));
+
+    // --- Validação mínima ---
+    if (!geojson.metadata) throw new Error("Ficheiro sem 'metadata'.");
+    if (!Array.isArray(geojson.features)) throw new Error("Ficheiro sem 'features'.");
+
+    const ops = geojson.metadata.operations || [];
+    if (ops.length > 5) throw new Error("Número de operações maior que 5.");
+
+    // --- Prevenir duplicados ---
+    const docId = String(geojson.metadata.id || "");
+    if (docId) {
+      const existing = await db.collection("worksheets").doc(docId).get();
+      if (existing.exists) {
+        return res.render("worksheets-import", { currentUser: req.user, error: `Worksheet com id ${docId} já existe.` });
+      }
+    }
+
+    // --- Payload para Firestore ---
+    const payload = {
+      op_code: "IMP-FO",
+      operacao: "IMPORTAÇÃO de uma folha de obra",
+      descricao: "Importação de GeoJSON com uma folha de obra",
+      ref_recom: "MH",
+      metadata: geojson.metadata,
+      features: geojson.features,
+      crs: geojson.crs || null,
+      createdAt: new Date(),
+      createdBy: req.user.uid,
+      createdByRole: req.user.role
+    };
+
+    const ref = docId ? db.collection("worksheets").doc(docId) : db.collection("worksheets").doc();
+    await ref.set(payload);
+
+    return res.redirect("/worksheets?imported=1");
+  } catch (err) {
+    console.error(err);
+    res.render("worksheets-import", { currentUser: req.user, error: err.message });
   }
 });
 

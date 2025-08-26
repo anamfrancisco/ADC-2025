@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worksheets</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-indigo-600">Worksheets</h1>
+    <div class="flex items-center gap-4">
+      <a href="/profile" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+        Voltar ao Perfil
+      </a>
+      <form action="/logout" method="POST">
+        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+          Logout
+        </button>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Conteúdo principal -->
+  <main class="max-w-6xl mx-auto p-6 space-y-10">
+
+    <!-- Importar Worksheet -->
+    <% if (currentUser && (currentUser.role === 'BACKOFFICE' || currentUser.role === 'ADMIN')) { %>
+      <div class="flex justify-end mb-4">
+        <a href="/worksheets/import" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+          Importar Worksheet
+        </a>
+      </div>
+    <% } %>
+
+    <!-- Tabela de Worksheets -->
+    <section class="bg-white p-6 rounded-2xl shadow">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Lista de Worksheets</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-center">
+          <thead>
+            <tr class="bg-gray-100 text-gray-700">
+              <th class="px-4 py-2">ID</th>
+              <th class="px-4 py-2">AIGP</th>
+              <th class="px-4 py-2">POSA → POSP</th>
+              <th class="px-4 py-2">Datas</th>
+              <th class="px-4 py-2">Operações</th>
+              <th class="px-4 py-2">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            <% if (worksheets.length > 0) { %>
+              <% worksheets.forEach(ws => { %>
+                <tr class="border-t hover:bg-gray-50">
+                  <td class="px-4 py-2 font-medium text-gray-800"><%= ws.metadata?.id || ws.id %></td>
+                  <td class="px-4 py-2"><%= (ws.metadata?.aigp || []).join(", ") %></td>
+                  <td class="px-4 py-2"><%= ws.metadata?.posa_code || "-" %> → <%= ws.metadata?.posp_code || "-" %></td>
+                  <td class="px-4 py-2 text-sm text-gray-500">
+                    Emissão: <%= ws.metadata?.issue_date || "-" %><br/>
+                    Início: <%= ws.metadata?.starting_date || "-" %><br/>
+                    Fim: <%= ws.metadata?.finishing_date || "-" %>
+                  </td>
+                  <td class="px-4 py-2"><%= (ws.metadata?.operations || []).length %> op(s)</td>
+                  <td class="px-4 py-2 flex justify-center gap-2">
+                    <a href="/worksheets/<%= ws.id %>" class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600">
+                      Ver
+                    </a>
+                    <a href="/worksheets/<%= ws.id %>/edit" class="px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600">
+                      Editar
+                    </a>
+                    <form action="/worksheets/<%= ws.id %>?_method=DELETE" method="POST"
+                          onsubmit="return confirm('Tem a certeza que quer apagar esta worksheet?');">
+                      <button type="submit" class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600">
+                        Remover
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="6" class="px-4 py-6 text-gray-500">Nenhuma worksheet encontrada.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
