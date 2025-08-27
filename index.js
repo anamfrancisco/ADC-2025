@@ -598,6 +598,17 @@ app.post('/edit-user/:uid', async (req, res) => {
 
 /* WORKSHEETS */
 
+// Middleware para autorizar roles
+function authorizeRoles(roles) {
+  return (req, res, next) => {
+    const user = req.session.user;  // ou req.user se já usares Passport
+    if (!user) return res.redirect('/login'); // não autenticado
+    if (!roles.includes(user.role)) return res.status(403).send("Sem permissão");
+    next();
+  };
+}
+
+
 // Listar worksheets
 app.get("/worksheets", async (req, res) => {
   const snapshot = await db.collection("worksheets").get();
