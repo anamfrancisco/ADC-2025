@@ -601,7 +601,7 @@ app.post('/edit-user/:uid', async (req, res) => {
 // Middleware para autorizar roles
 function authorizeRoles(roles) {
   return (req, res, next) => {
-    const user = req.session.user;  // ou req.user se já usares Passport
+    const user = req.session.user;  
     if (!user) return res.redirect('/login'); // não autenticado
     if (!roles.includes(user.role)) return res.status(403).send("Sem permissão");
     next();
@@ -609,30 +609,32 @@ function authorizeRoles(roles) {
 }
 
 
-// Listar worksheets
-app.get("/worksheets", async (req, res) => {
-  const snapshot = await db.collection("worksheets").get();
-  const worksheets = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-  res.render("worksheets", { worksheets });
+app.get("/worksheets", authorizeRoles(["BACKOFFICE", "ADMIN"]), async (req, res) => {
+  try {
+    const snapshot = await db.collection("worksheets").orderBy("createdAt", "desc").get();
+    const worksheets = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Passa também o utilizador logado
+    res.render("worksheets", { 
+      worksheets, 
+      currentUser: req.session.user || null 
+    });
+  } catch (err) {
+    console.error("Erro ao buscar worksheets:", err);
+    res.status(500).send("Erro interno ao carregar worksheets");
+  }
 });
 
 
 // Configuração do multer para ficheiros em memória
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
-// --- Listagem de worksheets ---
-app.get("/worksheets", async (req, res) => {
-  const snapshot = await db.collection("worksheets").orderBy("createdAt", "desc").get();
-  const worksheets = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-  res.render("worksheets", { worksheets, currentUser: req.user });
-});
-
 // --- Formulário de importação ---
 app.get("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), (req, res) => {
-  res.render("worksheets-import", { currentUser: req.user, error: null });
+  res.render("worksheets-import", { currentUser: req.session.user, error: null });
 });
 
 // --- Importação de worksheet (GeoJSON) ---
@@ -654,7 +656,7 @@ app.post("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), upload.si
     if (docId) {
       const existing = await db.collection("worksheets").doc(docId).get();
       if (existing.exists) {
-        return res.render("worksheets-import", { currentUser: req.user, error: `Worksheet com id ${docId} já existe.` });
+        return res.render("worksheets-import", { currentUser: req.session.user, error: `Worksheet com id ${docId} já existe.` });
       }
     }
 
@@ -668,8 +670,8 @@ app.post("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), upload.si
       features: geojson.features,
       crs: geojson.crs || null,
       createdAt: new Date(),
-      createdBy: req.user.uid,
-      createdByRole: req.user.role
+      createdBy: req.session.user.uid,
+      createdByRole: req.session.user.role
     };
 
     const ref = docId ? db.collection("worksheets").doc(docId) : db.collection("worksheets").doc();
@@ -678,7 +680,7 @@ app.post("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), upload.si
     return res.redirect("/worksheets?imported=1");
   } catch (err) {
     console.error(err);
-    res.render("worksheets-import", { currentUser: req.user, error: err.message });
+    res.render("worksheets-import", { currentUser: req.session.user, error: err.message });
   }
 });
 
