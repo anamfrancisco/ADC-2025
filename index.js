@@ -660,36 +660,22 @@ app.post("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), upload.si
       }
     }
 
-    // --- Guardar o ficheiro no Firebase Storage ---
-    const bucket = admin.storage().bucket();
-    const fileName = `worksheets/${docId || Date.now()}.geojson`;
-
-    const file = bucket.file(fileName);
-    await file.save(JSON.stringify(geojson), {
-      contentType: "application/json",
-      resumable: false
-    });
-
-    // URL de download
-    const [url] = await file.getSignedUrl({
-      action: "read",
-      expires: "03-01-2035" // expira em 2035
-    });
-
-    // --- Payload simplificado para Firestore ---
+    // --- Payload completo para Firestore ---
     const payload = {
       op_code: "IMP-FO",
       operacao: "IMPORTAÇÃO de uma folha de obra",
       descricao: "Importação de GeoJSON com uma folha de obra",
       ref_recom: "MH",
-      metadata: geojson.metadata,
-      fileUrl: url, // link para o Storage
+      geojson, // guarda o ficheiro inteiro dentro do documento
       createdAt: new Date(),
       createdBy: req.session.user.uid,
       createdByRole: req.session.user.role
     };
 
-    const ref = docId ? db.collection("worksheets").doc(docId) : db.collection("worksheets").doc();
+    const ref = docId 
+      ? db.collection("worksheets").doc(docId) 
+      : db.collection("worksheets").doc();
+
     await ref.set(payload);
 
     return res.redirect("/worksheets?imported=1");
