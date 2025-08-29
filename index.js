@@ -678,9 +678,20 @@ app.post("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), upload.si
     const batch = db.batch();
     geojson.features.forEach((f, idx) => {
       const fRef = ref.collection("features").doc(String(idx));
-      batch.set(fRef, f);
+
+      const featureDoc = {
+        type: f.type,
+        properties: f.properties || {},
+        geometryType: f.geometry?.type || null,
+        coordinates: f.geometry?.coordinates 
+          ? JSON.stringify(f.geometry.coordinates) 
+          : null
+      };
+
+      batch.set(fRef, featureDoc);
     });
     await batch.commit();
+
 
     return res.redirect("/worksheets?imported=1");
   } catch (err) {
