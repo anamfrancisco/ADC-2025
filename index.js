@@ -637,7 +637,6 @@ app.get("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), (req, res)
   res.render("worksheets-import", { currentUser: req.session.user, error: null });
 });
 
-// --- Importação de worksheet (GeoJSON) ---
 app.post("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), upload.single("geojson"), async (req, res) => {
   try {
     if (!req.file) throw new Error("Ficheiro GeoJSON não enviado.");
@@ -653,37 +652,43 @@ app.post("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), upload.si
 
     // --- Prevenir duplicados ---
     const docId = String(geojson.metadata.id || "");
+    const ref = docId ? db.collection("worksheets").doc(docId) : db.collection("worksheets").doc();
+
     if (docId) {
-      const existing = await db.collection("worksheets").doc(docId).get();
+      const existing = await ref.get();
       if (existing.exists) {
         return res.render("worksheets-import", { currentUser: req.session.user, error: `Worksheet com id ${docId} já existe.` });
       }
     }
 
-    // --- Payload completo para Firestore ---
-    const payload = {
+    // --- Documento principal (sem features) ---
+    await ref.set({
       op_code: "IMP-FO",
       operacao: "IMPORTAÇÃO de uma folha de obra",
       descricao: "Importação de GeoJSON com uma folha de obra",
       ref_recom: "MH",
-      geojson, // guarda o ficheiro inteiro dentro do documento
+      metadata: geojson.metadata,
+      crs: geojson.crs || null,
       createdAt: new Date(),
       createdBy: req.session.user.uid,
       createdByRole: req.session.user.role
-    };
+    });
 
-    const ref = docId 
-      ? db.collection("worksheets").doc(docId) 
-      : db.collection("worksheets").doc();
-
-    await ref.set(payload);
+    // --- Guardar features em subcoleção ---
+    const batch = db.batch();
+    geojson.features.forEach((f, idx) => {
+      const fRef = ref.collection("features").doc(String(idx));
+      batch.set(fRef, f);
+    });
+    await batch.commit();
 
     return res.redirect("/worksheets?imported=1");
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao importar worksheet:", err);
     res.render("worksheets-import", { currentUser: req.session.user, error: err.message });
   }
 });
+
 
 
 
