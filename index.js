@@ -755,6 +755,60 @@ app.get("/worksheets/:id", authorizeRoles(["BACKOFFICE","ADMIN"]), async (req, r
 });
 
 
+// --- EDITAR WORKSHEET ---
+app.get("/worksheets/:id/edit", authorizeRoles(["BACKOFFICE","ADMIN"]), async (req, res) => {
+  try {
+    const wsRef = db.collection("worksheets").doc(req.params.id);
+    const doc = await wsRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).send("Worksheet não encontrada");
+    }
+
+    const worksheet = { id: doc.id, ...doc.data() };
+
+    // obter features
+    const featuresSnap = await wsRef.collection("features").get();
+    const features = featuresSnap.docs.map(f => ({ id: f.id, ...f.data() }));
+
+    res.render("worksheet-edit", { currentUser: req.session.user, worksheet, features });
+  } catch (err) {
+    console.error("Erro ao abrir edit worksheet:", err);
+    res.status(500).send("Erro interno");
+  }
+});
+
+app.post("/worksheets/:id/edit", authorizeRoles(["BACKOFFICE","ADMIN"]), async (req, res) => {
+  try {
+    const wsRef = db.collection("worksheets").doc(req.params.id);
+
+    await wsRef.update({
+      "metadata.service_provider": req.body.service_provider || null,
+      "metadata.issue_date": req.body.issue_date || null,
+      "metadata.starting_date": req.body.starting_date || null,
+      "metadata.finishing_date": req.body.finishing_date || null,
+      updatedAt: new Date(),
+      updatedBy: req.session.user.uid
+    });
+
+    res.redirect(`/worksheets/${req.params.id}`);
+  } catch (err) {
+    console.error("Erro ao atualizar worksheet:", err);
+    res.status(500).send("Erro interno");
+  }
+});
+
+// --- REMOVER FEATURE ---
+app.post("/worksheets/:id/features/:fid/delete", authorizeRoles(["BACKOFFICE","ADMIN"]), async (req, res) => {
+  try {
+    const wsRef = db.collection("worksheets").doc(req.params.id);
+    await wsRef.collection("features").doc(req.params.fid).delete();
+    res.redirect(`/worksheets/${req.params.id}/edit`);
+  } catch (err) {
+    console.error("Erro ao remover feature:", err);
+    res.status(500).send("Erro interno");
+  }
+});
 
 
 

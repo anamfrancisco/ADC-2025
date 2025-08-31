@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Worksheet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-indigo-600">Editar Worksheet</h1>
+    <div class="flex items-center gap-4">
+      <a href="/worksheets/<%= worksheet.id %>" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+        ← Voltar
+      </a>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto p-6 space-y-10">
+    <!-- Form metadados -->
+    <form action="/worksheets/<%= worksheet.id %>/edit" method="POST" class="bg-white p-6 rounded-2xl shadow space-y-5">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Metadados</h2>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Prestador de Serviço</label>
+        <input type="text" name="service_provider" value="<%= worksheet.metadata?.service_provider || '' %>"
+               class="w-full px-4 py-2 border rounded-lg" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Data Emissão</label>
+        <input type="date" name="issue_date" value="<%= worksheet.metadata?.issue_date || '' %>"
+               class="w-full px-4 py-2 border rounded-lg" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Data Início</label>
+        <input type="date" name="starting_date" value="<%= worksheet.metadata?.starting_date || '' %>"
+               class="w-full px-4 py-2 border rounded-lg" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Data Fim</label>
+        <input type="date" name="finishing_date" value="<%= worksheet.metadata?.finishing_date || '' %>"
+               class="w-full px-4 py-2 border rounded-lg" />
+      </div>
+
+      <div class="flex justify-end">
+        <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+          Guardar Alterações
+        </button>
+      </div>
+    </form>
+
+    <!-- Lista de features -->
+    <section class="bg-white p-6 rounded-2xl shadow">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Polígonos/Features</h2>
+      <% if (features.length > 0) { %>
+        <ul class="space-y-3">
+          <% features.forEach(f => { %>
+            <li class="flex justify-between items-center border p-3 rounded-lg">
+              <div>
+                <span class="font-medium">Feature <%= f.id %></span><br/>
+                <small class="text-gray-500">Tipo: <%= f.geometry?.type || 'N/A' %></small>
+              </div>
+              <form action="/worksheets/<%= worksheet.id %>/features/<%= f.id %>/delete" method="POST"
+                    onsubmit="return confirm('Tem a certeza que quer remover este polígono?');">
+                <button type="submit" class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600">
+                  Remover
+                </button>
+              </form>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p class="text-gray-500">Nenhuma feature associada.</p>
+      <% } %>
+    </section>
+  </main>
+</body>
+</html>
