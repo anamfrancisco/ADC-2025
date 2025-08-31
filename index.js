@@ -701,6 +701,61 @@ app.post("/worksheets/import", authorizeRoles(["BACKOFFICE","ADMIN"]), upload.si
 });
 
 
+//View WOKSHEETS//
+app.get("/worksheets/:id", authorizeRoles(["BACKOFFICE","ADMIN"]), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Buscar worksheet principal
+    const ref = db.collection("worksheets").doc(id);
+    const doc = await ref.get();
+
+    if (!doc.exists) {
+      return res.status(404).send("Worksheet não encontrada");
+    }
+
+    const worksheet = doc.data();
+
+    // Buscar features associadas
+    const snapshot = await ref.collection("features").get();
+    const features = snapshot.docs.map(d => {
+      const f = d.data();
+      // Transformar as coordenadas string de volta em array
+      return {
+        ...f,
+        coordinates: JSON.parse(f.coordinates || "[]")
+      };
+    });
+
+    // Reconstruir GeoJSON (se precisares)
+    const geojson = {
+      type: "FeatureCollection",
+      metadata: worksheet.metadata,
+      features: features.map(f => ({
+        type: "Feature",
+        properties: f.properties,
+        geometry: {
+          type: f.geometryType,
+          coordinates: f.coordinates
+        }
+      }))
+    };
+
+    res.render("worksheet-view", { 
+      worksheet, 
+      features,
+      geojson,
+      currentUser: req.session.user
+    });
+
+  } catch (err) {
+    console.error("Erro ao carregar worksheet:", err);
+    res.status(500).send("Erro interno ao carregar worksheet");
+  }
+});
+
+
+
 
 
 createRootUser();

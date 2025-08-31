@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ver Worksheet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded-2xl shadow w-full max-w-3xl">
+    <h1 class="text-2xl font-bold text-indigo-600 mb-6">Worksheet <%= worksheet.metadata?.id || worksheet.id %></h1>
+
+    <div class="mb-6">
+      <p><strong>Descrição:</strong> <%= worksheet.descricao %></p>
+      <p><strong>Criado por:</strong> <%= worksheet.createdByRole %> em <%= worksheet.createdAt.toDate().toLocaleString() %></p>
+    </div>
+
+    <h2 class="text-xl font-semibold mb-4">Features</h2>
+    <ul class="space-y-3">
+      <% features.forEach(f => { %>
+        <li class="p-3 border rounded-lg">
+          <p><strong>Tipo:</strong> <%= f.geometryType %></p>
+          <p><strong>Properties:</strong> <%= JSON.stringify(f.properties) %></p>
+          <p><strong>Coordinates:</strong> <%= JSON.stringify(f.coordinates) %></p>
+        </li>
+      <% }) %>
+    </ul>
+
+    <div class="mt-6 text-center">
+      <a href="/worksheets" class="text-sm text-gray-600 hover:underline">← Voltar à lista</a>
+    </div>
+  </div>
+</body>
+</html>
