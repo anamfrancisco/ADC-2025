@@ -11,15 +11,19 @@
   <!-- Navbar -->
   <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
     <h1 class="text-xl font-bold text-indigo-600">Gestão de Conta</h1>
-     <a href="/worksheets" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+
+    <div class="flex items-center space-x-4">
+      <a href="/worksheets" 
+        class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
         Folhas de Obra
       </a>
       <form action="/logout" method="POST">
-        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+        <button type="submit" 
+                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
           Logout
         </button>
-      </button>
-    </form>
+      </form>
+    </div>
   </nav>
 
   <main class="max-w-6xl mx-auto p-6 space-y-10">
