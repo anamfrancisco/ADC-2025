@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worksheet <%= worksheet?.metadata?.id || worksheet?.id || "-" %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-indigo-600">Worksheet Detalhes</h1>
+    <div class="flex items-center gap-4">
+      <a href="/worksheets" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+        ← Voltar à lista
+      </a>
+      <form action="/logout" method="POST">
+        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+          Logout
+        </button>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Conteúdo -->
+  <main class="max-w-5xl mx-auto p-6 space-y-8">
+
+    <!-- Cabeçalho -->
+    <section class="bg-white p-6 rounded-2xl shadow">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">
+        Folha: <%= worksheet?.metadata?.id || worksheet?.id || "-" %>
+      </h2>
+      <p class="text-gray-600">
+        Operação: <%= worksheet?.operacao || "-" %>
+      </p>
+      <p class="text-gray-600">
+        Descrição: <%= worksheet?.descricao || "-" %>
+      </p>
+    </section>
+
+    <!-- Metadata -->
+    <section class="bg-white p-6 rounded-2xl shadow">
+      <h3 class="text-xl font-semibold text-gray-700 mb-3">Metadados</h3>
+      <ul class="space-y-1 text-gray-600">
+        <li><strong>AIGP:</strong> <%= (worksheet?.metadata?.aigp || []).join(", ") || "-" %></li>
+        <li><strong>POSA:</strong> <%= worksheet?.metadata?.posa_code || "-" %></li>
+        <li><strong>POSP:</strong> <%= worksheet?.metadata?.posp_code || "-" %></li>
+        <li><strong>Data Emissão:</strong> <%= worksheet?.metadata?.issue_date || "-" %></li>
+        <li><strong>Início:</strong> <%= worksheet?.metadata?.starting_date || "-" %></li>
+        <li><strong>Fim:</strong> <%= worksheet?.metadata?.finishing_date || "-" %></li>
+      </ul>
+    </section>
+
+    <!-- Features -->
+    <section class="bg-white p-6 rounded-2xl shadow">
+      <h3 class="text-xl font-semibold text-gray-700 mb-3">Features</h3>
+      <% if (features && features.length > 0) { %>
+        <ul class="divide-y">
+          <% features.forEach((f, idx) => { %>
+            <li class="py-3">
+              <p class="font-medium text-gray-800">Feature <%= idx %></p>
+              <p class="text-sm text-gray-600">Tipo: <%= f?.type || "-" %></p>
+              <p class="text-sm text-gray-600">Geometry: <%= JSON.stringify(f?.geometry) || "-" %></p>
+              <p class="text-sm text-gray-600">Properties: <%= JSON.stringify(f?.properties) || "-" %></p>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p class="text-gray-500">Nenhuma feature encontrada.</p>
+      <% } %>
+    </section>
+
+  </main>
+</body>
+</html>

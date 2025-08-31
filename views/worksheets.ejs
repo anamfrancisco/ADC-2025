@@ -51,18 +51,26 @@
             </tr>
           </thead>
           <tbody class="text-center">
-            <% if (worksheets.length > 0) { %>
+            <% if (worksheets && worksheets.length > 0) { %>
               <% worksheets.forEach(ws => { %>
                 <tr class="border-t hover:bg-gray-50">
-                  <td class="px-4 py-2 font-medium text-gray-800"><%= ws.metadata?.id || ws.id %></td>
-                  <td class="px-4 py-2"><%= (ws.metadata?.aigp || []).join(", ") %></td>
-                  <td class="px-4 py-2"><%= ws.metadata?.posa_code || "-" %> → <%= ws.metadata?.posp_code || "-" %></td>
+                  <td class="px-4 py-2 font-medium text-gray-800">
+                    <%= ws.metadata?.id || ws.id || "-" %>
+                  </td>
+                  <td class="px-4 py-2">
+                    <%= (ws.metadata?.aigp || []).join(", ") || "-" %>
+                  </td>
+                  <td class="px-4 py-2">
+                    <%= ws.metadata?.posa_code || "-" %> → <%= ws.metadata?.posp_code || "-" %>
+                  </td>
                   <td class="px-4 py-2 text-sm text-gray-500">
                     Emissão: <%= ws.metadata?.issue_date || "-" %><br/>
                     Início: <%= ws.metadata?.starting_date || "-" %><br/>
                     Fim: <%= ws.metadata?.finishing_date || "-" %>
                   </td>
-                  <td class="px-4 py-2"><%= (ws.metadata?.operations || []).length %> op(s)</td>
+                  <td class="px-4 py-2">
+                    <%= (ws.metadata?.operations || []).length %> op(s)
+                  </td>
                   <td class="px-4 py-2 flex justify-center gap-2">
                     <a href="/worksheets/<%= ws.id %>" class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600">
                       Ver
