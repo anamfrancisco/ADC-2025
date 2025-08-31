@@ -810,6 +810,41 @@ app.post("/worksheets/:id/features/:fid/delete", authorizeRoles(["BACKOFFICE","A
   }
 });
 
+// --- Remover Worksheet e respetivas atividades ---
+app.post("/worksheets/:id/delete", authorizeRoles(["BACKOFFICE","ADMIN"]), async (req, res) => {
+  const wsId = req.params.id;
+  const wsRef = db.collection("worksheets").doc(wsId);
+
+  try {
+    const wsDoc = await wsRef.get();
+    if (!wsDoc.exists) {
+      return res.status(404).send("Worksheet não encontrada");
+    }
+
+    // --- Apagar features da worksheet ---
+    const featuresSnap = await wsRef.collection("features").get();
+    const batchFeatures = db.batch();
+    featuresSnap.forEach(doc => batchFeatures.delete(doc.ref));
+    if (!featuresSnap.empty) await batchFeatures.commit();
+
+    // --- Apagar folhas de execução associadas ---
+    const execSnap = await db.collection("executionSheets").where("worksheetId", "==", wsId).get();
+    const batchExec = db.batch();
+    execSnap.forEach(doc => batchExec.delete(doc.ref));
+    if (!execSnap.empty) await batchExec.commit();
+
+    // --- Apagar a worksheet principal ---
+    await wsRef.delete();
+
+    // Redirecionar para lista com sucesso
+    res.redirect("/worksheets?deleted=1");
+  } catch (err) {
+    console.error("Erro ao apagar worksheet:", err);
+    res.status(500).send("Erro interno ao apagar worksheet");
+  }
+});
+
+
 
 
 createRootUser();
