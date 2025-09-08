@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Worksheet <%= worksheet?.metadata?.id || worksheet?.id || "-" %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
@@ -70,6 +72,43 @@
         <p class="text-gray-500">Nenhuma feature encontrada.</p>
       <% } %>
     </section>
+
+    <div id="map" style="height: 500px;"></div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+      const geojsonData = <%- JSON.stringify(geojson) %>;
+      const map = L.map('map').setView([38.7, -9.3], 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      const bounds = [];
+
+      geojsonData.features.forEach(feature => {
+        const { geometry, properties } = feature;
+        if (!geometry || !geometry.coordinates) return;
+
+        if (geometry.type === "Polygon") {
+          const coords = geometry.coordinates[0].map(c => [c[1], c[0]]);
+          const polygon = L.polygon(coords, { color: 'blue' }).addTo(map);
+          polygon.bindPopup(properties?.name || "Polígono");
+          bounds.push(...coords);
+        }
+
+        if (geometry.type === "Point") {
+          const [lng, lat] = geometry.coordinates;
+          const marker = L.marker([lat, lng]).addTo(map);
+          marker.bindPopup(properties?.name || "Ponto");
+          bounds.push([lat, lng]);
+        }
+      });
+
+      if (bounds.length > 0) {
+        map.fitBounds(bounds);
+      }
+    });
+  </script>
 
   </main>
 </body>
