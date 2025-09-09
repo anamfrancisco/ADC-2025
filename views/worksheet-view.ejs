@@ -76,39 +76,65 @@
     <div id="map" style="height: 500px;"></div>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-      const geojsonData = <%- JSON.stringify(geojson) %>;
-      const map = L.map('map').setView([38.7, -9.3], 13);
+        const geojsonData = <%- JSON.stringify(geojson) %>;
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
+        // 1. Inicializar o mapa
+        const map = L.map('map').setView([38.7, -9.3], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 
-      const bounds = [];
+        // 2. Recolher todos os pontos das features
+        const allPoints = [];
 
-      geojsonData.features.forEach(feature => {
-        const { geometry, properties } = feature;
-        if (!geometry || !geometry.coordinates) return;
+        geojsonData.features.forEach(feature => {
+          const { geometry } = feature;
+          if (!geometry || !geometry.coordinates) return;
 
-        if (geometry.type === "Polygon") {
-          const coords = geometry.coordinates[0].map(c => [c[1], c[0]]);
-          const polygon = L.polygon(coords, { color: 'blue' }).addTo(map);
-          polygon.bindPopup(properties?.name || "Polígono");
-          bounds.push(...coords);
+          if (geometry.type === "Polygon") {
+            const coords = geometry.coordinates[0]; // primeiro anel
+            coords.forEach(([lng, lat]) => {
+              allPoints.push([lat, lng]); // Leaflet usa [lat, lng]
+            });
+          }
+
+          if (geometry.type === "Point") {
+            const [lng, lat] = geometry.coordinates;
+            allPoints.push([lat, lng]);
+          }
+        });
+
+        // 3. Desenhar o polígono que liga todos os pontos
+        if (allPoints.length > 2) {
+          const unionPolygon = L.polygon(allPoints, {
+            color: 'red',
+            fillOpacity: 0.2
+          }).addTo(map);
+
+          unionPolygon.bindPopup("Área total das features");
+          map.fitBounds(unionPolygon.getBounds());
         }
 
-        if (geometry.type === "Point") {
-          const [lng, lat] = geometry.coordinates;
-          const marker = L.marker([lat, lng]).addTo(map);
-          marker.bindPopup(properties?.name || "Ponto");
-          bounds.push([lat, lng]);
-        }
+        
+        /*geojsonData.features.forEach(feature => {
+          const { geometry, properties } = feature;
+          if (!geometry || !geometry.coordinates) return;
+
+          if (geometry.type === "Polygon") {
+            const coords = geometry.coordinates[0].map(([lng, lat]) => [lat, lng]);
+            L.polygon(coords, { color: 'blue' }).addTo(map)
+              .bindPopup(properties?.name || "Polígono");
+          }
+
+          if (geometry.type === "Point") {
+            const [lng, lat] = geometry.coordinates;
+            L.marker([lat, lng]).addTo(map)
+              .bindPopup(properties?.name || "Ponto");
+          }
+        });*/
       });
+    </script>
 
-      if (bounds.length > 0) {
-        map.fitBounds(bounds);
-      }
-    });
-  </script>
 
   </main>
 </body>
