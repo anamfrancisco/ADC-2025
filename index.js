@@ -720,13 +720,15 @@ app.get("/worksheets/:id", authorizeRoles(["BACKOFFICE","ADMIN"]), async (req, r
     const snapshot = await ref.collection("features").get();
     const features = snapshot.docs.map(d => {
       const f = d.data();
-      // Transformar as coordenadas string de volta em array
       return {
-        ...f,
+        id: d.id,
+        type: f.type || "Feature",
+        geometryType: f.geometryType || null,
         coordinates: JSON.parse(f.coordinates || "[]"),
         properties: f.properties || {}
       };
     });
+
 
     // Reconstruir GeoJSON (se precisares)
     const geojson = {
