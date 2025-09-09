@@ -723,7 +723,7 @@ app.get("/worksheets/:id", authorizeRoles(["BACKOFFICE","ADMIN"]), async (req, r
       // Transformar as coordenadas string de volta em array
       return {
         ...f,
-        coordinates: JSON.parse(f.coordinates || "[]")
+        coordinates: JSON.parse(f.coordinates || "[]"),
         properties: f.properties || {}
       };
     });
