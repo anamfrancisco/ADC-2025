@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Falhado</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center h-screen">
+  <div class="bg-white p-10 rounded-2xl shadow-lg text-center max-w-md w-full">
+    
+    <!-- Error Icon -->
+    <div class="flex justify-center mb-6">
+      <svg xmlns="http://www.w3.org/2000/svg" 
+           class="h-16 w-16 text-red-500" 
+           fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M12 9v2m0 4h.01M12 5a7 7 0 100 14a7 7 0 000-14z"/>
+      </svg>
+    </div>
+
+    <!-- Title -->
+    <h1 class="text-2xl font-bold text-red-600 mb-4">Login falhado</h1>
+    <p class="text-gray-600 mb-8">As credenciais estão incorretas ou não tens permissão para aceder.</p>
+
+    <!-- Button -->
+    <a href="/login" 
+       class="px-6 py-3 bg-indigo-600 text-white rounded-xl shadow hover:bg-indigo-700 transition">
+      Tentar novamente
+    </a>
+  </div>
+</body>
+</html>

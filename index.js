@@ -219,8 +219,9 @@ app.post('/login', async (req, res) => {
     res.redirect('/profile');
 
   } catch (error) {
-    const message = error.response?.data?.error?.message || error.message;
-    res.status(401).send('Login failed: ' + message);
+    //const message = error.response?.data?.error?.message || error.message;
+    //res.status(401).send('Login failed: ' + message);
+    res.render("login-failed"); // se estiveres a usar EJS
   }
 });
 
