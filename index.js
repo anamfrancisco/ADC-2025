@@ -724,6 +724,7 @@ app.get("/worksheets/:id", authorizeRoles(["BACKOFFICE","ADMIN"]), async (req, r
       return {
         ...f,
         coordinates: JSON.parse(f.coordinates || "[]")
+        properties: f.properties || {}
       };
     });
 
