@@ -63,8 +63,8 @@
             <li class="py-3">
               <p class="font-medium text-gray-800">Feature <%= idx %></p>
               <p class="text-sm text-gray-600">Tipo: <%= f?.type || "-" %></p>
-              <p class="text-sm text-gray-600">Geometry: <%= JSON.stringify(f?.geometry) || "-" %></p>
-              <p class="text-sm text-gray-600">Properties: <%= JSON.stringify(f?.properties) || "-" %></p>
+              <p class="text-sm text-gray-600">Geometry: <%= f?.geometryType ? `${f.geometryType} - ${JSON.stringify(f.coordinates)}` : "-" %></p>
+              <div class="text-sm text-gray-600 space-y-1"><% Object.entries(f?.properties || {}).forEach(([key, value]) => { %><p><strong><%= key %>:</strong> <%= value %></p><% }) %></div>
             </li>
           <% }) %>
         </ul>
