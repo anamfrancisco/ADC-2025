@@ -113,18 +113,42 @@
           }
         });
 
-        // 3. Desenhar o polígono que liga todos os pontos
-        if (allPoints.length > 2) {
-          const unionPolygon = L.polygon(allPoints, {
-            color: 'red',
-            fillOpacity: 0.2
-          }).addTo(map);
+        let bounds = [];
 
-          unionPolygon.bindPopup("Área total das features");
-          map.fitBounds(unionPolygon.getBounds());
+        geojsonData.features.forEach(feature => {
+          const { geometry, properties } = feature;
+          if (!geometry || !geometry.coordinates) return;
+
+          if (geometry.type === "Polygon") {
+            const coords = geometry.coordinates[0].map(([x, y]) => {
+              const [lng, lat] = convertCoord([x, y]);
+              bounds.push([lat, lng]);
+              return [lat, lng];
+            });
+
+            L.polygon(coords, {
+              color: 'blue',
+              fillOpacity: 0.3
+            }).addTo(map)
+              .bindPopup(properties?.name || "Polígono");
+          }
+
+          if (geometry.type === "Point") {
+            const [x, y] = geometry.coordinates;
+            const [lng, lat] = convertCoord([x, y]);
+            bounds.push([lat, lng]);
+
+            L.marker([lat, lng]).addTo(map)
+              .bindPopup(properties?.name || "Ponto");
+          }
+        });
+        
+        if (bounds.length > 0) {
+          map.fitBounds(bounds);
         }
 
-        
+
+                
       });
     </script>
 
