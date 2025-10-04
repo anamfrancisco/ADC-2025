@@ -91,29 +91,41 @@
           attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // 2. Recolher todos os pontos das features
-        const allPoints = [];
+        let bounds = [];
 
         geojsonData.features.forEach(feature => {
-          const { geometry } = feature;
+          const { geometry, properties } = feature;
           if (!geometry || !geometry.coordinates) return;
 
           if (geometry.type === "Polygon") {
-            const coords = geometry.coordinates[0]; // primeiro anel
-            coords.forEach(([x, y]) => {
-              const [lng, lat] = convertCoord([x, y]);
-              allPoints.push([lat, lng]); // Leaflet usa [lat, lng]
-            });
+            const convertedRings = geometry.coordinates.map(ring =>
+              ring.map(([x, y]) => {
+                const [lng, lat] = convertCoord([x, y]);
+                bounds.push([lat, lng]);
+                return [lat, lng];
+              })
+            );
+
+            L.polygon(convertedRings[0], {
+              color: 'blue',
+              fillOpacity: 0.3
+            }).addTo(map)
+              .bindPopup(`Feature ID: ${properties?.id || "Sem ID"}`);
           }
 
           if (geometry.type === "Point") {
             const [x, y] = geometry.coordinates;
             const [lng, lat] = convertCoord([x, y]);
-            allPoints.push([lat, lng]);
+            bounds.push([lat, lng]);
+
+            L.marker([lat, lng]).addTo(map)
+              .bindPopup(`Feature ID: ${properties?.id || "Sem ID"}`);
           }
         });
 
-        let bounds = [];
+        if (bounds.length > 0) {
+          map.fitBounds(bounds);
+        }
 
         geojsonData.features.forEach(feature => {
           const { geometry, properties } = feature;
