@@ -65,14 +65,16 @@ exports.import = async (req, res) => {
         converted = f.geometry.coordinates.map(ring =>
           ring.map(([x, y]) => {
             const [lon, lat] = proj4("EPSG:3763", "EPSG:4326", [x, y]);
-            return [lon, lat];
+            // Leaflet expects [lat, lon]
+            return [lat, lon];
           })
         );
       } else if (f.geometry?.type === "Point") {
         const [x, y] = f.geometry.coordinates;
         const [lon, lat] = proj4("EPSG:3763", "EPSG:4326", [x, y]);
-        converted = [lon, lat];
+        converted = [lat, lon];
       }
+
 
 
       const featureDoc = {
