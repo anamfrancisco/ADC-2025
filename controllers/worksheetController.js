@@ -1,6 +1,13 @@
 // controllers/worksheetController.js
 const { db } = require('../config/firebase');
 
+const proj4 = require("proj4");
+
+proj4.defs("EPSG:3763", "+proj=tmerc +lat_0=39.66825833333333 +lon_0=-8.133108333333333 +k=1 +x_0=200000 +y_0=300000 +ellps=GRS80 +units=m +no_defs");
+
+const convertCoord = ([x, y]) => proj4("EPSG:3763", "EPSG:4326", [x, y]);
+
+
 exports.list = async (req, res) => {
   try {
     const snapshot = await db.collection('worksheets').orderBy('createdAt', 'desc').get();
@@ -52,12 +59,23 @@ exports.import = async (req, res) => {
     const batch = db.batch();
     geojson.features.forEach((f, idx) => {
       const fRef = ref.collection("features").doc(String(idx));
+      let converted = [];
+
+      if (f.geometry?.type === "Polygon") {
+        converted = f.geometry.coordinates.map(ring =>
+          ring.map(convertCoord)
+        );
+      } else if (f.geometry?.type === "Point") {
+        converted = convertCoord(f.geometry.coordinates);
+      }
+
       const featureDoc = {
         type: f.type,
         properties: f.properties || {},
         geometryType: f.geometry?.type || null,
-        coordinates: f.geometry?.coordinates ? JSON.stringify(f.geometry.coordinates) : null
+        coordinates: JSON.stringify(converted)
       };
+
       batch.set(fRef, featureDoc);
     });
     await batch.commit();

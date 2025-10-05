@@ -90,18 +90,21 @@
         const { geometry, properties } = feature;
         if (!geometry || !geometry.coordinates) return;
 
-        if (geometry.type === "Polygon") {
-          const coords = geometry.coordinates[0].map(([lng, lat]) => {
-            bounds.push([lat, lng]);
-            return [lat, lng];
-          });
+       if (geometry.type === "Polygon") {
+          const rings = geometry.coordinates.map(ring =>
+            ring.map(([lng, lat]) => {
+              bounds.push([lat, lng]);
+              return [lat, lng];
+            })
+          );
 
-          L.polygon(coords, {
+          L.polygon(rings, {
             color: 'blue',
             fillOpacity: 0.3
           }).addTo(map)
             .bindPopup(`Feature ID: ${properties?.id || "Sem ID"}`);
         }
+
 
         if (geometry.type === "Point") {
           const [lng, lat] = geometry.coordinates;
