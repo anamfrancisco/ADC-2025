@@ -63,11 +63,17 @@ exports.import = async (req, res) => {
 
       if (f.geometry?.type === "Polygon") {
         converted = f.geometry.coordinates.map(ring =>
-          ring.map(convertCoord)
+          ring.map(([x, y]) => {
+            const [lon, lat] = proj4("EPSG:3763", "EPSG:4326", [x, y]);
+            return [lon, lat];
+          })
         );
       } else if (f.geometry?.type === "Point") {
-        converted = convertCoord(f.geometry.coordinates);
+        const [x, y] = f.geometry.coordinates;
+        const [lon, lat] = proj4("EPSG:3763", "EPSG:4326", [x, y]);
+        converted = [lon, lat];
       }
+
 
       const featureDoc = {
         type: f.type,
