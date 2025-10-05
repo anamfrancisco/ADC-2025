@@ -77,12 +77,12 @@
     <script>
       
       document.addEventListener("DOMContentLoaded", () => {
-      const geojsonData = <%- JSON.stringify(geojson) %>;
+  const geojsonData = <%- JSON.stringify(geojson) %>;
 
-      const map = L.map('map').setView([38.7, -9.3], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
+  const map = L.map('map').setView([38.7, -9.3], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
 
       let bounds = [];
 
@@ -90,9 +90,14 @@
         const { geometry, properties } = feature;
         if (!geometry || !geometry.coordinates) return;
 
-       if (geometry.type === "Polygon") {
-          const rings = geometry.coordinates.map(ring =>
-            ring.map(([lng, lat]) => {
+        if (geometry.type === "Polygon") {
+          // Detectar se é [[lat, lng], ...] ou [[[lat, lng], ...]]
+          const coords = geometry.coordinates[0]?.[0]?.length
+            ? geometry.coordinates // já está em formato [[[], []], ...]
+            : [geometry.coordinates]; // envolver num array
+
+          const rings = coords.map(ring =>
+            ring.map(([lat, lng]) => {
               bounds.push([lat, lng]);
               return [lat, lng];
             })
@@ -105,11 +110,9 @@
             .bindPopup(`Feature ID: ${properties?.id || "Sem ID"}`);
         }
 
-
         if (geometry.type === "Point") {
-          const [lng, lat] = geometry.coordinates;
+          const [lat, lng] = geometry.coordinates;
           bounds.push([lat, lng]);
-
           L.marker([lat, lng]).addTo(map)
             .bindPopup(`Feature ID: ${properties?.id || "Sem ID"}`);
         }
@@ -119,6 +122,7 @@
         map.fitBounds(bounds);
       }
     });
+
 
     </script>
 
