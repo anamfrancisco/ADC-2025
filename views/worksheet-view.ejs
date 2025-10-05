@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.5/proj4.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
@@ -76,94 +75,49 @@
 
     <div id="map" style="height: 500px;"></div>
     <script>
+      
       document.addEventListener("DOMContentLoaded", () => {
-        const geojsonData = <%- JSON.stringify(geojson) %>;
+      const geojsonData = <%- JSON.stringify(geojson) %>;
 
-        // Define o sistema de origem (exemplo: PT-TM06 / EPSG:3763)
-        proj4.defs("EPSG:3763", "+proj=tmerc +lat_0=39.66825833333333 +lon_0=-8.133108333333333 +k=1 +x_0=200000 +y_0=300000 +ellps=GRS80 +units=m +no_defs");
+      const map = L.map('map').setView([38.7, -9.3], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
 
-        // Função para converter coordenadas
-        const convertCoord = ([x, y]) => proj4("EPSG:3763", "EPSG:4326", [x, y]);
+      let bounds = [];
 
-        // 1. Inicializar o mapa
-        const map = L.map('map').setView([38.7, -9.3], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+      geojsonData.features.forEach(feature => {
+        const { geometry, properties } = feature;
+        if (!geometry || !geometry.coordinates) return;
 
-        let bounds = [];
-
-        geojsonData.features.forEach(feature => {
-          const { geometry, properties } = feature;
-          if (!geometry || !geometry.coordinates) return;
-
-          if (geometry.type === "Polygon") {
-            const convertedRings = geometry.coordinates.map(ring =>
-              ring.map(([x, y]) => {
-                const [lng, lat] = convertCoord([x, y]);
-                bounds.push([lat, lng]);
-                return [lat, lng];
-              })
-            );
-
-            L.polygon(convertedRings[0], {
-              color: 'blue',
-              fillOpacity: 0.3
-            }).addTo(map)
-              .bindPopup(`Feature ID: ${properties?.id || "Sem ID"}`);
-          }
-
-          if (geometry.type === "Point") {
-            const [x, y] = geometry.coordinates;
-            const [lng, lat] = convertCoord([x, y]);
+        if (geometry.type === "Polygon") {
+          const coords = geometry.coordinates[0].map(([lng, lat]) => {
             bounds.push([lat, lng]);
+            return [lat, lng];
+          });
 
-            L.marker([lat, lng]).addTo(map)
-              .bindPopup(`Feature ID: ${properties?.id || "Sem ID"}`);
-          }
-        });
-
-        if (bounds.length > 0) {
-          map.fitBounds(bounds);
+          L.polygon(coords, {
+            color: 'blue',
+            fillOpacity: 0.3
+          }).addTo(map)
+            .bindPopup(`Feature ID: ${properties?.id || "Sem ID"}`);
         }
 
-        geojsonData.features.forEach(feature => {
-          const { geometry, properties } = feature;
-          if (!geometry || !geometry.coordinates) return;
+        if (geometry.type === "Point") {
+          const [lng, lat] = geometry.coordinates;
+          bounds.push([lat, lng]);
 
-          if (geometry.type === "Polygon") {
-            const coords = geometry.coordinates[0].map(([x, y]) => {
-              const [lng, lat] = convertCoord([x, y]);
-              bounds.push([lat, lng]);
-              return [lat, lng];
-            });
-
-            L.polygon(coords, {
-              color: 'blue',
-              fillOpacity: 0.3
-            }).addTo(map)
-              .bindPopup(properties?.name || "Polígono");
-          }
-
-          if (geometry.type === "Point") {
-            const [x, y] = geometry.coordinates;
-            const [lng, lat] = convertCoord([x, y]);
-            bounds.push([lat, lng]);
-
-            L.marker([lat, lng]).addTo(map)
-              .bindPopup(properties?.name || "Ponto");
-          }
-        });
-        
-        if (bounds.length > 0) {
-          map.fitBounds(bounds);
+          L.marker([lat, lng]).addTo(map)
+            .bindPopup(`Feature ID: ${properties?.id || "Sem ID"}`);
         }
-
-
-                
       });
-    </script>
 
+      if (bounds.length > 0) {
+        map.fitBounds(bounds);
+      }
+    });
+
+    </script>
 
   </main>
 </body>
