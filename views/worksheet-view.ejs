@@ -89,6 +89,7 @@
       geojsonData.features.forEach(feature => {
         const { geometry, properties } = feature;
         if (!geometry || !geometry.coordinates) return;
+        console.log("DEBUG geometry:", geometry);
 
         if (geometry.type === "Polygon") {
           // Detectar se é [[lat, lng], ...] ou [[[lat, lng], ...]]
